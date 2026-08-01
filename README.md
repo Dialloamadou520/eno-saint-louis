@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ENO Saint-Louis — Interventions informatiques & contrôle des accès
 
-## Getting Started
+Plateforme de gestion des interventions informatiques et de contrôle des accès de
+l'Espace Numérique Ouvert (ENO) de Saint-Louis.
 
-First, run the development server:
+## Modules
+
+| Module | Route | Contenu |
+| --- | --- | --- |
+| Authentification | `/connexion` | Connexion Supabase, protection des routes via `src/proxy.ts` |
+| Tableau de bord | `/tableau-de-bord` | Présents, étudiants et visiteurs du jour, interventions ouvertes, fréquentation 7 jours |
+| Accès du personnel | `/acces/personnel` | Entrées/sorties, fonction, signature numérique, observations |
+| Étudiants & visiteurs | `/acces/visiteurs` | Matricule, filière, niveau, motif, service/personne rencontrée, pièce d'identité |
+| Historique | `/historique` | Journal unifié par période (aujourd'hui, semaine, mois, année) |
+| Interventions | `/interventions` | Création, affectation, priorités, statuts, journal de suivi |
+| Équipements | `/equipements` | Inventaire du parc et états (fonctionnel, en panne, maintenance, réformé) |
+| Statistiques | `/statistiques` | Fréquentation, motifs, heures d'affluence, taux de présence, interventions/mois |
+| Rapports | `/rapports` | 8 rapports exportables en PDF et Excel |
+| Notifications | `/notifications` | Alertes internes, marquage comme lu |
+| Utilisateurs | `/utilisateurs` | Comptes, rôles et activation (administrateurs uniquement) |
+
+Rôles : `admin`, `technicien`, `surveillant`, `agent`.
+
+## Stack
+
+Next.js 16 (App Router, Server Components, Server Actions) · React 19 · TypeScript ·
+Tailwind CSS v4 · Supabase (Postgres + Auth + RLS) · Recharts · jsPDF · ExcelJS.
+
+## Démarrage
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sans identifiants Supabase, l'application démarre en **mode démonstration** : toutes
+les pages sont alimentées par un jeu de données fictives déterministe
+(`src/lib/sample-data.ts`) et les écritures sont désactivées.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Brancher Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Créer un projet sur [supabase.com](https://supabase.com).
+2. Copier `.env.example` vers `.env.local` et renseigner :
 
-## Learn More
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+   SUPABASE_SERVICE_ROLE_KEY=...   # serveur uniquement
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Appliquer la migration `supabase/migrations/0001_init.sql` (SQL Editor du projet
+   ou `supabase db push`). Elle crée les tables, les enums, les triggers
+   (numérotation `INT-AAAA-000`, date de clôture, création du profil à l'inscription)
+   et les politiques RLS.
+4. Créer le premier compte dans **Authentication > Users**, puis passer son profil en
+   `admin` :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```sql
+   update public.profiles set role = 'admin' where email = 'votre@email';
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Le mode démonstration se désactive automatiquement dès que l'URL et la clé anonyme
+sont valides.
 
-## Deploy on Vercel
+## Exports
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Les rapports sont générés côté serveur par `/api/rapports` :
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+/api/rapports?type=presence-personnel&format=pdf&periode=mois
+/api/rapports?type=frequentation-journaliere&format=xlsx&periode=semaine
+```
+
+`type` : `presence-personnel`, `entrees-etudiants`, `frequentation-journaliere`,
+`motifs-visite`, `duree-moyenne`, `interventions`, `equipements`, `historique-acces`.
+`periode` : `aujourdhui`, `semaine`, `mois`, `annee`.
+
+## Qualité
+
+```bash
+npm run lint
+npm run build
+```
