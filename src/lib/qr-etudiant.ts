@@ -9,6 +9,7 @@ export interface EtudiantScanne {
 
 const ALIAS: Record<string, keyof EtudiantScanne> = {
   matricule: "matricule",
+  ine: "matricule",
   mat: "matricule",
   id: "matricule",
   numero: "matricule",

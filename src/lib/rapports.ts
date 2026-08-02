@@ -51,7 +51,7 @@ export const LIBELLES_RAPPORT: Record<
   "entrees-etudiants": {
     titre: "Entrées des étudiants",
     description:
-      "Détail des étudiants reçus : matricule, filière, motif et durée de visite.",
+      "Détail des étudiants reçus : INE, filière, motif et durée de visite.",
   },
   "frequentation-journaliere": {
     titre: "Fréquentation journalière",
@@ -147,7 +147,7 @@ export async function construireRapport(
     return {
       ...base,
       colonnes: [
-        "Date", "Matricule", "Nom", "Filière", "Niveau", "Motif", "Service",
+        "Date", "INE", "Nom", "Filière", "Niveau", "Motif", "Service",
         "Entrée", "Sortie", "Durée",
       ],
       lignes: etudiants.map((e) => [

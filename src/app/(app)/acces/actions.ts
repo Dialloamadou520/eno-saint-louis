@@ -93,7 +93,7 @@ export async function enregistrerEntreeVisiteur(
   const typeVisiteur = (texte(formData, "type_visiteur") || "etudiant") as TypeVisiteur;
   if (!nom) return { error: "Le nom est obligatoire." };
   if (typeVisiteur === "etudiant" && !texte(formData, "matricule")) {
-    return { error: "Le matricule est obligatoire pour un étudiant." };
+    return { error: "L'INE est obligatoire pour un étudiant." };
   }
 
   const blocage = await verifierDroits();

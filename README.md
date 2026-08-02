@@ -10,7 +10,7 @@ l'Espace Numérique Ouvert (ENO) de Saint-Louis.
 | Authentification | `/connexion` | Connexion Supabase, protection des routes via `src/proxy.ts` |
 | Tableau de bord | `/tableau-de-bord` | Présents, étudiants et visiteurs du jour, interventions ouvertes, fréquentation 7 jours |
 | Accès du personnel | `/acces/personnel` | Entrées/sorties, fonction, signature numérique, observations |
-| Étudiants & visiteurs | `/acces/visiteurs` | Matricule, filière, niveau, motif, service/personne rencontrée, pièce d'identité |
+| Étudiants & visiteurs | `/acces/visiteurs` | INE, filière, niveau, motif, service/personne rencontrée, pièce d'identité |
 | Historique | `/historique` | Journal unifié par période (aujourd'hui, semaine, mois, année) |
 | Interventions | `/interventions` | Création, affectation, priorités, statuts, journal de suivi |
 | Équipements | `/equipements` | Inventaire du parc et états (fonctionnel, en panne, maintenance, réformé) |
@@ -61,25 +61,28 @@ d'environnement sont absentes.
 
 ## Scan de la carte étudiant
 
-Le formulaire d'arrivée (Étudiants & visiteurs) remplit matricule, nom,
+Le formulaire d'arrivée (Étudiants & visiteurs) remplit INE, nom,
 téléphone, filière et niveau à partir de la carte (caméra en HTTPS) :
 
 - **QR code** : lecture continue pendant que la caméra est ouverte ;
 - **carte imprimée** (carte UNCHK/ENO sans QR) : bouton « Lire la carte » ou
   import d'une photo, OCR local (`tesseract.js`, modèle français) testé dans les
-  quatre orientations ; l'INE devient le matricule et la formation la filière.
+  quatre orientations ; l'INE et la formation (filière) sont repris tels quels.
+
+L'INE est stocké dans la colonne `acces_visiteurs.matricule` (nom historique de
+la colonne, libellé « INE » dans l'interface).
 
 Aucune image ne quitte le navigateur. Les champs restent modifiables si l'OCR se
 trompe. Formats de QR acceptés :
 
 ```
-{"matricule":"ENO2026001","nom":"Awa Sow","filiere":"Informatique","niveau":"Licence 2"}
-matricule=ENO2026001;nom=Awa Sow;filiere=Informatique;niveau=Licence 2
-ENO2026001
+{"ine":"N00078620201","nom":"Awa Sow","filiere":"Informatique","niveau":"L2"}
+ine=N00078620201;nom=Awa Sow;filiere=Informatique;niveau=L2
+N00078620201
 ```
 
-Si le QR ne contient que le matricule, les autres champs sont complétés à partir
-de la dernière visite enregistrée pour ce matricule.
+Si le QR ne contient que l'INE, les autres champs sont complétés à partir de la
+dernière visite enregistrée pour cet INE.
 
 ## Exports
 
