@@ -9,12 +9,12 @@ import {
   retrouverEtudiant,
   type EtatFormulaire,
 } from "@/app/(app)/acces/actions";
-import { QrScanner } from "@/components/acces/qr-scanner";
+import { CarteScanner } from "@/components/acces/carte-scanner";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { MOTIFS_VISITE, NIVEAUX, SERVICES } from "@/lib/constants";
-import { analyserQrEtudiant, type EtudiantScanne } from "@/lib/qr-etudiant";
+import type { EtudiantScanne } from "@/lib/qr-etudiant";
 import type { MotifVisite, TypeVisiteur } from "@/lib/types";
 
 const IDENTITE_VIDE = {
@@ -25,7 +25,7 @@ const IDENTITE_VIDE = {
   niveau: "",
 };
 
-/** Ne conserve que les champs réellement présents dans le QR code. */
+/** Ne conserve que les champs réellement lus sur la carte. */
 function champsRenseignes(scanne: EtudiantScanne): Partial<EtudiantScanne> {
   return Object.fromEntries(
     Object.entries(scanne).filter(([, valeur]) => valeur !== "")
@@ -63,10 +63,9 @@ export function VisiteurForm() {
 
   const estEtudiant = type === "etudiant";
 
-  async function traiterScan(contenu: string) {
-    const scanne = analyserQrEtudiant(contenu);
+  async function traiterScan(scanne: EtudiantScanne) {
     if (!scanne.matricule && !scanne.nom) {
-      toast.error("QR code illisible : saisissez le matricule manuellement.");
+      toast.error("Carte illisible : saisissez les informations manuellement.");
       return;
     }
 
@@ -102,7 +101,7 @@ export function VisiteurForm() {
         size="lg"
       >
         <form action={action} className="space-y-4">
-          <QrScanner onScan={(contenu) => void traiterScan(contenu)} />
+          <CarteScanner onEtudiant={(etudiant) => void traiterScan(etudiant)} />
 
           <Field label="Type" htmlFor="type_visiteur">
             <Select

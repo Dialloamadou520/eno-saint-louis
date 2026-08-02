@@ -61,9 +61,16 @@ d'environnement sont absentes.
 
 ## Scan de la carte étudiant
 
-Le formulaire d'arrivée (Étudiants & visiteurs) propose un scan QR par la caméra
-(HTTPS requis) qui remplit matricule, nom, téléphone, filière et niveau. Trois
-formats de QR sont acceptés :
+Le formulaire d'arrivée (Étudiants & visiteurs) remplit matricule, nom,
+téléphone, filière et niveau à partir de la carte (caméra en HTTPS) :
+
+- **QR code** : lecture continue pendant que la caméra est ouverte ;
+- **carte imprimée** (carte UNCHK/ENO sans QR) : bouton « Lire la carte » ou
+  import d'une photo, OCR local (`tesseract.js`, modèle français) testé dans les
+  quatre orientations ; l'INE devient le matricule et la formation la filière.
+
+Aucune image ne quitte le navigateur. Les champs restent modifiables si l'OCR se
+trompe. Formats de QR acceptés :
 
 ```
 {"matricule":"ENO2026001","nom":"Awa Sow","filiere":"Informatique","niveau":"Licence 2"}
