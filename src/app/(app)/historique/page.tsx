@@ -86,7 +86,7 @@ export default async function HistoriquePage({
         champs={[
           {
             nom: "q",
-            label: "Nom ou matricule",
+            label: "Nom ou INE",
             type: "texte",
             placeholder: "Rechercher…",
           },

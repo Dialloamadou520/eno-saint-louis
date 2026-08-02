@@ -65,7 +65,7 @@ export default async function AccesVisiteursPage({
         champs={[
           {
             nom: "q",
-            label: "Nom, matricule ou téléphone",
+            label: "Nom, INE ou téléphone",
             type: "texte",
             placeholder: "Rechercher…",
           },
@@ -112,7 +112,7 @@ export default async function AccesVisiteursPage({
           <thead>
             <tr>
               <Th>Date</Th>
-              <Th>Matricule</Th>
+              <Th>INE</Th>
               <Th>Nom</Th>
               <Th>Filière / Niveau</Th>
               <Th>Téléphone</Th>

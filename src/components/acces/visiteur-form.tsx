@@ -117,11 +117,15 @@ export function VisiteurForm() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             {estEtudiant ? (
-              <Field label="Matricule" htmlFor="matricule">
+              <Field
+                label="INE"
+                htmlFor="matricule"
+                hint="Identifiant national de l'étudiant, imprimé sur la carte"
+              >
                 <Input
                   id="matricule"
                   name="matricule"
-                  placeholder="ENO2026001"
+                  placeholder="N00078620201"
                   required
                   value={identite.matricule}
                   onChange={(e) =>
