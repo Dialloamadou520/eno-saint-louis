@@ -6,13 +6,31 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   enregistrerEntreeVisiteur,
+  retrouverEtudiant,
   type EtatFormulaire,
 } from "@/app/(app)/acces/actions";
+import { QrScanner } from "@/components/acces/qr-scanner";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { MOTIFS_VISITE, NIVEAUX, SERVICES } from "@/lib/constants";
+import { analyserQrEtudiant, type EtudiantScanne } from "@/lib/qr-etudiant";
 import type { MotifVisite, TypeVisiteur } from "@/lib/types";
+
+const IDENTITE_VIDE = {
+  matricule: "",
+  nom: "",
+  telephone: "",
+  filiere: "",
+  niveau: "",
+};
+
+/** Ne conserve que les champs réellement présents dans le QR code. */
+function champsRenseignes(scanne: EtudiantScanne): Partial<EtudiantScanne> {
+  return Object.fromEntries(
+    Object.entries(scanne).filter(([, valeur]) => valeur !== "")
+  );
+}
 
 function BoutonEnregistrer() {
   const { pending } = useFormStatus();
@@ -27,11 +45,13 @@ export function VisiteurForm() {
   const [ouvert, setOuvert] = useState(false);
   const [type, setType] = useState<TypeVisiteur>("etudiant");
   const [motif, setMotif] = useState<MotifVisite>("assistance_informatique");
+  const [identite, setIdentite] = useState(IDENTITE_VIDE);
   const [, action] = useActionState<EtatFormulaire | undefined, FormData>(
     async (precedent, formData) => {
       const resultat = await enregistrerEntreeVisiteur(precedent, formData);
       if (resultat.success) {
         toast.success(resultat.success);
+        setIdentite(IDENTITE_VIDE);
         setOuvert(false);
       } else if (resultat.error) {
         toast.error(resultat.error);
@@ -42,6 +62,30 @@ export function VisiteurForm() {
   );
 
   const estEtudiant = type === "etudiant";
+
+  async function traiterScan(contenu: string) {
+    const scanne = analyserQrEtudiant(contenu);
+    if (!scanne.matricule && !scanne.nom) {
+      toast.error("QR code illisible : saisissez le matricule manuellement.");
+      return;
+    }
+
+    setType("etudiant");
+    setIdentite((precedent) => ({ ...precedent, ...champsRenseignes(scanne) }));
+    toast.success(`Carte scannée : ${scanne.matricule || scanne.nom}`);
+
+    if (!scanne.matricule) return;
+    const connu = await retrouverEtudiant(scanne.matricule);
+    if (!connu) return;
+
+    setIdentite((precedent) => ({
+      ...precedent,
+      nom: precedent.nom || connu.nom,
+      telephone: precedent.telephone || connu.telephone,
+      filiere: precedent.filiere || connu.filiere,
+      niveau: precedent.niveau || connu.niveau,
+    }));
+  }
 
   return (
     <>
@@ -58,6 +102,8 @@ export function VisiteurForm() {
         size="lg"
       >
         <form action={action} className="space-y-4">
+          <QrScanner onScan={(contenu) => void traiterScan(contenu)} />
+
           <Field label="Type" htmlFor="type_visiteur">
             <Select
               id="type_visiteur"
@@ -78,11 +124,21 @@ export function VisiteurForm() {
                   name="matricule"
                   placeholder="ENO2026001"
                   required
+                  value={identite.matricule}
+                  onChange={(e) =>
+                    setIdentite({ ...identite, matricule: e.target.value })
+                  }
                 />
               </Field>
             ) : null}
             <Field label="Nom et prénom" htmlFor="nom">
-              <Input id="nom" name="nom" required />
+              <Input
+                id="nom"
+                name="nom"
+                required
+                value={identite.nom}
+                onChange={(e) => setIdentite({ ...identite, nom: e.target.value })}
+              />
             </Field>
             <Field label="Téléphone" htmlFor="telephone">
               <Input
@@ -90,6 +146,10 @@ export function VisiteurForm() {
                 name="telephone"
                 type="tel"
                 placeholder="+221 77 000 00 00"
+                value={identite.telephone}
+                onChange={(e) =>
+                  setIdentite({ ...identite, telephone: e.target.value })
+                }
               />
             </Field>
           </div>
@@ -97,10 +157,25 @@ export function VisiteurForm() {
           {estEtudiant ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Filière" htmlFor="filiere">
-                <Input id="filiere" name="filiere" placeholder="Informatique" />
+                <Input
+                  id="filiere"
+                  name="filiere"
+                  placeholder="Informatique"
+                  value={identite.filiere}
+                  onChange={(e) =>
+                    setIdentite({ ...identite, filiere: e.target.value })
+                  }
+                />
               </Field>
               <Field label="Niveau" htmlFor="niveau">
-                <Select id="niveau" name="niveau" defaultValue="">
+                <Select
+                  id="niveau"
+                  name="niveau"
+                  value={identite.niveau}
+                  onChange={(e) =>
+                    setIdentite({ ...identite, niveau: e.target.value })
+                  }
+                >
                   <option value="">—</option>
                   {NIVEAUX.map((niveau) => (
                     <option key={niveau} value={niveau}>

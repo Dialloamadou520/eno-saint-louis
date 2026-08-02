@@ -126,6 +126,45 @@ export async function enregistrerEntreeVisiteur(
   return { success: `Entrée de ${nom} enregistrée.` };
 }
 
+export interface EtudiantConnu {
+  nom: string;
+  telephone: string;
+  filiere: string;
+  niveau: string;
+}
+
+/**
+ * Dernière fiche connue pour un matricule, afin de compléter le formulaire
+ * après un scan qui ne contient que l'identifiant de la carte.
+ */
+export async function retrouverEtudiant(
+  matricule: string
+): Promise<EtudiantConnu | null> {
+  const identifiant = matricule.trim();
+  if (!identifiant) return null;
+
+  const blocage = await verifierDroits();
+  if (blocage) return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("acces_visiteurs")
+    .select("nom, telephone, filiere, niveau")
+    .eq("matricule", identifiant)
+    .order("heure_entree", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return null;
+
+  return {
+    nom: data.nom ?? "",
+    telephone: data.telephone ?? "",
+    filiere: data.filiere ?? "",
+    niveau: data.niveau ?? "",
+  };
+}
+
 export async function enregistrerSortieVisiteur(
   formData: FormData
 ): Promise<void> {

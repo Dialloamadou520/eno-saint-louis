@@ -59,6 +59,21 @@ d'environnement sont absentes.
    update public.profiles set role = 'admin' where email = 'votre@email';
    ```
 
+## Scan de la carte étudiant
+
+Le formulaire d'arrivée (Étudiants & visiteurs) propose un scan QR par la caméra
+(HTTPS requis) qui remplit matricule, nom, téléphone, filière et niveau. Trois
+formats de QR sont acceptés :
+
+```
+{"matricule":"ENO2026001","nom":"Awa Sow","filiere":"Informatique","niveau":"Licence 2"}
+matricule=ENO2026001;nom=Awa Sow;filiere=Informatique;niveau=Licence 2
+ENO2026001
+```
+
+Si le QR ne contient que le matricule, les autres champs sont complétés à partir
+de la dernière visite enregistrée pour ce matricule.
+
 ## Exports
 
 Les rapports sont générés côté serveur par `/api/rapports` :
