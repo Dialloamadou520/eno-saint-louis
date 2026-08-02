@@ -3,6 +3,10 @@ import { Topbar } from "@/components/layout/topbar";
 import { estAdmin, getProfilCourant } from "@/lib/data/auth";
 import { compterNonLues } from "@/lib/data/notifications";
 
+// Toutes les pages de l'espace applicatif dépendent de la session : jamais de
+// prérendu statique au build.
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
