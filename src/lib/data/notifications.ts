@@ -1,13 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { sampleNotifications } from "@/lib/sample-data";
 import type { AppNotification } from "@/lib/types";
 
 export async function getNotifications(
   limite = 30
 ): Promise<AppNotification[]> {
-  if (!isSupabaseConfigured) return sampleNotifications.slice(0, limite);
-
   const supabase = await createClient();
   const {
     data: { user },

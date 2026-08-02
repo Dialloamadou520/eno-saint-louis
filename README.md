@@ -33,9 +33,9 @@ npm install
 npm run dev
 ```
 
-Sans identifiants Supabase, l'application démarre en **mode démonstration** : toutes
-les pages sont alimentées par un jeu de données fictives déterministe
-(`src/lib/sample-data.ts`) et les écritures sont désactivées.
+Un projet Supabase configuré est obligatoire : l'application lit et écrit
+exclusivement dans la base réelle et échoue explicitement si les variables
+d'environnement sont absentes.
 
 ## Brancher Supabase
 
@@ -58,9 +58,6 @@ les pages sont alimentées par un jeu de données fictives déterministe
    ```sql
    update public.profiles set role = 'admin' where email = 'votre@email';
    ```
-
-Le mode démonstration se désactive automatiquement dès que l'URL et la clé anonyme
-sont valides.
 
 ## Exports
 

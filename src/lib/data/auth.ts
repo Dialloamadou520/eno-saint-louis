@@ -1,16 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { sampleProfiles } from "@/lib/sample-data";
 import type { Profile } from "@/lib/types";
 
-/**
- * Profil de l'utilisateur connecté. En mode démo (Supabase non configuré),
- * renvoie le compte administrateur d'exemple afin que l'interface reste
- * entièrement navigable.
- */
+/** Profil de l'utilisateur connecté, ou null si la session est absente. */
 export async function getProfilCourant(): Promise<Profile | null> {
-  if (!isSupabaseConfigured) return sampleProfiles[0];
-
   const supabase = await createClient();
   const {
     data: { user },

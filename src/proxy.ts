@@ -1,12 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  SUPABASE_ANON_KEY,
-  SUPABASE_URL,
-  isSupabaseConfigured,
-} from "@/lib/supabase/config";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
-const ROUTES_PUBLIQUES = ["/connexion", "/api/rapports"];
+const ROUTES_PUBLIQUES = ["/connexion"];
 
 /**
  * Next.js 16 « Proxy » (anciennement Middleware). Rafraîchit la session
@@ -14,9 +10,6 @@ const ROUTES_PUBLIQUES = ["/connexion", "/api/rapports"];
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-
-  // Mode démo (Supabase non configuré) : tout est accessible sans compte.
-  if (!isSupabaseConfigured) return response;
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {

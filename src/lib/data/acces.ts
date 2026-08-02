@@ -1,6 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { sampleAccesPersonnel, sampleAccesVisiteurs } from "@/lib/sample-data";
 import { MOTIFS_VISITE } from "@/lib/constants";
 import { today } from "@/lib/format";
 import type {
@@ -27,21 +25,6 @@ export async function getAccesPersonnel(
   filtres: FiltresAcces = {}
 ): Promise<AccesPersonnel[]> {
   const limite = filtres.limite ?? 500;
-
-  if (!isSupabaseConfigured) {
-    const q = filtres.q?.trim().toLowerCase();
-    return sampleAccesPersonnel
-      .filter((a) => {
-        if (filtres.debut && a.date_acces < filtres.debut) return false;
-        if (filtres.fin && a.date_acces > filtres.fin) return false;
-        if (filtres.service && a.fonction !== filtres.service) return false;
-        if (filtres.statut === "present" && a.heure_sortie) return false;
-        if (filtres.statut === "sorti" && !a.heure_sortie) return false;
-        if (q && !`${a.prenom} ${a.nom}`.toLowerCase().includes(q)) return false;
-        return true;
-      })
-      .slice(0, limite);
-  }
 
   const supabase = await createClient();
   let query = supabase
@@ -70,28 +53,6 @@ export async function getAccesVisiteurs(
   filtres: FiltresAcces = {}
 ): Promise<AccesVisiteur[]> {
   const limite = filtres.limite ?? 500;
-
-  if (!isSupabaseConfigured) {
-    const q = filtres.q?.trim().toLowerCase();
-    return sampleAccesVisiteurs
-      .filter((a) => {
-        if (filtres.debut && a.date_acces < filtres.debut) return false;
-        if (filtres.fin && a.date_acces > filtres.fin) return false;
-        if (filtres.service && a.service_rencontre !== filtres.service) return false;
-        if (filtres.motif && a.motif !== filtres.motif) return false;
-        if (filtres.type && a.type_visiteur !== filtres.type) return false;
-        if (filtres.statut === "present" && a.heure_sortie) return false;
-        if (filtres.statut === "sorti" && !a.heure_sortie) return false;
-        if (q) {
-          const cible = `${a.nom} ${a.matricule ?? ""} ${a.telephone ?? ""} ${
-            a.filiere ?? ""
-          }`;
-          if (!cible.toLowerCase().includes(q)) return false;
-        }
-        return true;
-      })
-      .slice(0, limite);
-  }
 
   const supabase = await createClient();
   let query = supabase

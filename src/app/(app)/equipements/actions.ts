@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getProfilCourant, peutGererInterventions } from "@/lib/data/auth";
 import type { EquipementCategorie, EquipementEtat } from "@/lib/types";
 
@@ -28,12 +27,6 @@ export async function enregistrerEquipement(
   const nom = texte(formData, "nom");
   if (!code || !nom) {
     return { error: "Le code et la désignation sont obligatoires." };
-  }
-  if (!isSupabaseConfigured) {
-    return {
-      error:
-        "Mode démonstration : configurez Supabase pour gérer réellement le parc.",
-    };
   }
 
   const profil = await getProfilCourant();

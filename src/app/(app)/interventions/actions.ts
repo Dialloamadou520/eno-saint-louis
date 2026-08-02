@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   getProfilCourant,
   peutGererInterventions,
@@ -14,9 +13,6 @@ export interface EtatFormulaire {
   error?: string;
   success?: string;
 }
-
-const MESSAGE_DEMO =
-  "Mode démonstration : configurez Supabase pour enregistrer réellement les interventions.";
 
 function texte(formData: FormData, cle: string): string {
   return String(formData.get(cle) ?? "").trim();
@@ -36,7 +32,6 @@ export async function creerIntervention(
   if (!titre || !demandeur) {
     return { error: "Le titre et le demandeur sont obligatoires." };
   }
-  if (!isSupabaseConfigured) return { error: MESSAGE_DEMO };
 
   const profil = await getProfilCourant();
   const supabase = await createClient();
@@ -67,7 +62,6 @@ export async function mettreAJourIntervention(
   const id = texte(formData, "id");
   const statut = texte(formData, "statut") as InterventionStatut;
   if (!id || !statut) return { error: "Intervention introuvable." };
-  if (!isSupabaseConfigured) return { error: MESSAGE_DEMO };
 
   const profil = await getProfilCourant();
   if (!peutGererInterventions(profil)) {
