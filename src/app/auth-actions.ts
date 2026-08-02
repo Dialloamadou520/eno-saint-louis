@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export async function seConnecter(
   _etat: { error?: string } | undefined,
@@ -14,10 +13,6 @@ export async function seConnecter(
 
   if (!email || !motDePasse) {
     return { error: "Renseignez votre email et votre mot de passe." };
-  }
-
-  if (!isSupabaseConfigured) {
-    redirect(redirectTo);
   }
 
   const supabase = await createClient();
@@ -34,9 +29,7 @@ export async function seConnecter(
 }
 
 export async function seDeconnecter(): Promise<void> {
-  if (isSupabaseConfigured) {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-  }
+  const supabase = await createClient();
+  await supabase.auth.signOut();
   redirect("/connexion");
 }

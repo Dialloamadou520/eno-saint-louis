@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { estAdmin, getProfilCourant } from "@/lib/data/auth";
 import type { FonctionAgent, UserRole } from "@/lib/types";
 
@@ -34,12 +33,6 @@ export async function creerUtilisateur(
   }
   if (motDePasse.length < 8) {
     return { error: "Le mot de passe doit contenir au moins 8 caractères." };
-  }
-  if (!isSupabaseConfigured) {
-    return {
-      error:
-        "Mode démonstration : configurez Supabase pour créer réellement des comptes.",
-    };
   }
 
   const profil = await getProfilCourant();
@@ -73,7 +66,7 @@ export async function creerUtilisateur(
 export async function basculerActivation(formData: FormData): Promise<void> {
   const id = texte(formData, "id");
   const actif = texte(formData, "actif") === "true";
-  if (!id || !isSupabaseConfigured) return;
+  if (!id) return;
 
   const profil = await getProfilCourant();
   if (!estAdmin(profil)) return;

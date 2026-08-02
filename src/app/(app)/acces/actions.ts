@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getProfilCourant, peutGererAcces } from "@/lib/data/auth";
 import type { FonctionAgent, MotifVisite, TypeVisiteur } from "@/lib/types";
 
@@ -11,11 +10,7 @@ export interface EtatFormulaire {
   success?: string;
 }
 
-const MESSAGE_DEMO =
-  "Mode démonstration : configurez Supabase pour enregistrer réellement les accès.";
-
 async function verifierDroits(): Promise<string | null> {
-  if (!isSupabaseConfigured) return MESSAGE_DEMO;
   const profil = await getProfilCourant();
   if (!peutGererAcces(profil)) {
     return "Vous n'avez pas les droits pour enregistrer un accès.";

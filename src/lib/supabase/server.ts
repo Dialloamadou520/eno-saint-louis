@@ -1,12 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
+import { SUPABASE_ANON_KEY, SUPABASE_URL, assertSupabaseConfig } from "./config";
 
 /**
  * Supabase client for Server Components, Route Handlers and Server Actions.
  * Reads/writes the auth cookies through the Next.js cookie store.
  */
 export async function createClient() {
+  assertSupabaseConfig();
   const cookieStore = await cookies();
 
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {

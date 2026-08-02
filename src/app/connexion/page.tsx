@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 import { SITE } from "@/lib/constants";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Connexion" };
 
@@ -30,13 +29,6 @@ export default async function ConnexionPage({
           <p className="mb-6 text-sm text-slate-500">
             Accès réservé au personnel de l&apos;ENO de Saint-Louis.
           </p>
-
-          {!isSupabaseConfigured ? (
-            <p className="mb-5 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Mode démonstration : la connexion n&apos;est pas vérifiée tant que
-              Supabase n&apos;est pas configuré.
-            </p>
-          ) : null}
 
           <LoginForm redirectTo={cible} />
         </div>

@@ -1,6 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { sampleInterventions, sampleSuivis } from "@/lib/sample-data";
 import type { Intervention, InterventionSuivi } from "@/lib/types";
 
 const SELECT_INTERVENTION =
@@ -18,25 +16,6 @@ export interface FiltresInterventions {
 export async function getInterventions(
   filtres: FiltresInterventions = {}
 ): Promise<Intervention[]> {
-  if (!isSupabaseConfigured) {
-    const q = filtres.q?.trim().toLowerCase();
-    return sampleInterventions.filter((i) => {
-      if (filtres.statut && i.statut !== filtres.statut) return false;
-      if (filtres.priorite && i.priorite !== filtres.priorite) return false;
-      if (filtres.technicien && i.technicien_id !== filtres.technicien) return false;
-      const jour = i.date_ouverture.slice(0, 10);
-      if (filtres.debut && jour < filtres.debut) return false;
-      if (filtres.fin && jour > filtres.fin) return false;
-      if (q) {
-        const cible = `${i.numero} ${i.titre} ${i.demandeur_nom} ${
-          i.demandeur_service ?? ""
-        } ${i.equipement?.code ?? ""}`;
-        if (!cible.toLowerCase().includes(q)) return false;
-      }
-      return true;
-    });
-  }
-
   const supabase = await createClient();
   let query = supabase
     .from("interventions")
@@ -60,10 +39,6 @@ export async function getInterventions(
 }
 
 export async function getIntervention(id: string): Promise<Intervention | null> {
-  if (!isSupabaseConfigured) {
-    return sampleInterventions.find((i) => i.id === id) ?? null;
-  }
-
   const supabase = await createClient();
   const { data } = await supabase
     .from("interventions")
@@ -77,12 +52,6 @@ export async function getIntervention(id: string): Promise<Intervention | null> 
 export async function getSuivis(
   interventionId: string
 ): Promise<InterventionSuivi[]> {
-  if (!isSupabaseConfigured) {
-    return sampleSuivis
-      .filter((s) => s.intervention_id === interventionId)
-      .sort((a, b) => a.created_at.localeCompare(b.created_at));
-  }
-
   const supabase = await createClient();
   const { data } = await supabase
     .from("intervention_suivis")

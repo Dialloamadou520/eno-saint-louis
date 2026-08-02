@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getProfilCourant } from "@/lib/data/auth";
 
 /**
@@ -10,8 +9,6 @@ import { getProfilCourant } from "@/lib/data/auth";
  * lorsqu'aucun identifiant n'est transmis.
  */
 export async function marquerCommeLue(formData: FormData): Promise<void> {
-  if (!isSupabaseConfigured) return;
-
   const profil = await getProfilCourant();
   if (!profil) return;
 
