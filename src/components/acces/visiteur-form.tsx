@@ -64,7 +64,7 @@ export function VisiteurForm() {
 
   const estEtudiant = type === "etudiant";
 
-  async function traiterScan(scanne: EtudiantScanne) {
+  async function traiterScan(scanne: EtudiantScanne, remplacer = false) {
     if (!scanne.matricule && !scanne.nom) {
       toast.error("Carte illisible : saisissez les informations manuellement.");
       return;
@@ -73,7 +73,8 @@ export function VisiteurForm() {
     setType("etudiant");
     setIdentite((precedent) => {
       const autreEtudiant = scanne.matricule && scanne.matricule !== precedent.matricule;
-      return { ...(autreEtudiant ? IDENTITE_VIDE : precedent), ...champsRenseignes(scanne) };
+      const base = remplacer || autreEtudiant ? IDENTITE_VIDE : precedent;
+      return { ...base, ...champsRenseignes(scanne) };
     });
     toast.success(`Carte scannée : ${scanne.matricule || scanne.nom}`);
 
@@ -92,7 +93,8 @@ export function VisiteurForm() {
 
   useLecteurQr((contenu) => {
     setOuvert(true);
-    void traiterScan(analyserQrEtudiant(contenu));
+    // Le lecteur a pu taper le contenu brut dans le champ actif : on repart à neuf.
+    void traiterScan(analyserQrEtudiant(contenu), true);
   });
 
   return (
@@ -114,7 +116,7 @@ export function VisiteurForm() {
           <p className="-mt-2 flex items-start gap-1.5 text-xs text-slate-500">
             <ScanQrCode className="mt-0.5 size-3.5 shrink-0" />
             Lecteur QR externe : scannez la carte ou l&apos;attestation à tout moment sur
-            cette page, le formulaire se remplit seul (hors saisie dans un champ).
+            cette page, le formulaire se remplit seul.
           </p>
 
           <Field label="Type" htmlFor="type_visiteur">
