@@ -52,10 +52,19 @@ function depuisEnregistrement(source: Record<string, unknown>): EtudiantScanne {
   return resultat;
 }
 
+/** Un INE ressemble à `N00078620201` (lettre optionnelle + 9 chiffres ou plus). */
+const INE = /\b([A-Z]?\d{9,14})\b/i;
+
+function avecIneDeduit(etudiant: EtudiantScanne, texte: string): EtudiantScanne {
+  if (etudiant.matricule) return etudiant;
+  return { ...etudiant, matricule: texte.match(INE)?.[1]?.toUpperCase() ?? "" };
+}
+
 /**
- * Interprète le contenu d'un QR code de carte étudiant. Trois formats sont
- * acceptés : JSON, paires `clé=valeur` séparées par `;` ou par des retours à
- * la ligne, et texte brut (considéré comme le matricule).
+ * Interprète le contenu d'un QR code de carte étudiant ou d'attestation.
+ * Formats acceptés : JSON, lien de vérification (paramètres `?ine=…`),
+ * paires `clé=valeur` séparées par `;`, `&` ou des retours à la ligne, et
+ * texte brut (l'INE qu'il contient, sinon le texte entier, sert de matricule).
  */
 export function analyserQrEtudiant(contenu: string): EtudiantScanne {
   const texte = contenu.trim();
@@ -72,15 +81,25 @@ export function analyserQrEtudiant(contenu: string): EtudiantScanne {
     }
   }
 
-  const paires = texte.split(/[;\n]+/).filter((part) => part.includes("="));
+  if (/^https?:\/\//i.test(texte)) {
+    try {
+      const url = new URL(texte);
+      const etudiant = depuisEnregistrement(Object.fromEntries(url.searchParams));
+      return avecIneDeduit(etudiant, decodeURIComponent(url.pathname + url.search));
+    } catch {
+      // Lien invalide : traité comme du texte.
+    }
+  }
+
+  const paires = texte.split(/[;&\r\n]+/).filter((part) => part.includes("="));
   if (paires.length > 0) {
     const source: Record<string, string> = {};
     for (const paire of paires) {
       const separateur = paire.indexOf("=");
       source[paire.slice(0, separateur)] = paire.slice(separateur + 1);
     }
-    return depuisEnregistrement(source);
+    return avecIneDeduit(depuisEnregistrement(source), texte);
   }
 
-  return { ...vide(), matricule: texte };
+  return { ...vide(), matricule: texte.match(INE)?.[1]?.toUpperCase() ?? texte };
 }

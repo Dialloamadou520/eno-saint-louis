@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Plus } from "lucide-react";
+import { Plus, ScanQrCode } from "lucide-react";
 import { toast } from "sonner";
 import {
   enregistrerEntreeVisiteur,
@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { MOTIFS_VISITE, NIVEAUX, SERVICES } from "@/lib/constants";
-import type { EtudiantScanne } from "@/lib/qr-etudiant";
+import { useLecteurQr } from "@/hooks/use-lecteur-qr";
+import { analyserQrEtudiant, type EtudiantScanne } from "@/lib/qr-etudiant";
 import type { MotifVisite, TypeVisiteur } from "@/lib/types";
 
 const IDENTITE_VIDE = {
@@ -70,7 +71,10 @@ export function VisiteurForm() {
     }
 
     setType("etudiant");
-    setIdentite((precedent) => ({ ...precedent, ...champsRenseignes(scanne) }));
+    setIdentite((precedent) => {
+      const autreEtudiant = scanne.matricule && scanne.matricule !== precedent.matricule;
+      return { ...(autreEtudiant ? IDENTITE_VIDE : precedent), ...champsRenseignes(scanne) };
+    });
     toast.success(`Carte scannée : ${scanne.matricule || scanne.nom}`);
 
     if (!scanne.matricule) return;
@@ -85,6 +89,11 @@ export function VisiteurForm() {
       niveau: precedent.niveau || connu.niveau,
     }));
   }
+
+  useLecteurQr((contenu) => {
+    setOuvert(true);
+    void traiterScan(analyserQrEtudiant(contenu));
+  });
 
   return (
     <>
@@ -102,6 +111,11 @@ export function VisiteurForm() {
       >
         <form action={action} className="space-y-4">
           <CarteScanner onEtudiant={(etudiant) => void traiterScan(etudiant)} />
+          <p className="-mt-2 flex items-start gap-1.5 text-xs text-slate-500">
+            <ScanQrCode className="mt-0.5 size-3.5 shrink-0" />
+            Lecteur QR externe : scannez la carte ou l&apos;attestation à tout moment sur
+            cette page, le formulaire se remplit seul (hors saisie dans un champ).
+          </p>
 
           <Field label="Type" htmlFor="type_visiteur">
             <Select
