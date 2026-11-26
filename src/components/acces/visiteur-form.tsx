@@ -82,13 +82,17 @@ export function VisiteurForm() {
     const connu = await retrouverEtudiant(scanne.matricule);
     if (!connu) return;
 
-    setIdentite((precedent) => ({
-      ...precedent,
-      nom: precedent.nom || connu.nom,
-      telephone: precedent.telephone || connu.telephone,
-      filiere: precedent.filiere || connu.filiere,
-      niveau: precedent.niveau || connu.niveau,
-    }));
+    setIdentite((precedent) => {
+      // Un autre étudiant a été scanné pendant la recherche.
+      if (precedent.matricule !== scanne.matricule) return precedent;
+      return {
+        ...precedent,
+        nom: precedent.nom || connu.nom,
+        telephone: precedent.telephone || connu.telephone,
+        filiere: precedent.filiere || connu.filiere,
+        niveau: precedent.niveau || connu.niveau,
+      };
+    });
   }
 
   useLecteurQr((contenu) => {
