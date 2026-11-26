@@ -57,7 +57,13 @@ const INE = /\b([A-Z]?\d{9,14})\b/i;
 
 function avecIneDeduit(etudiant: EtudiantScanne, texte: string): EtudiantScanne {
   if (etudiant.matricule) return etudiant;
-  return { ...etudiant, matricule: texte.match(INE)?.[1]?.toUpperCase() ?? "" };
+  const sansTelephone = etudiant.telephone
+    ? texte.split(etudiant.telephone).join(" ")
+    : texte;
+  return {
+    ...etudiant,
+    matricule: sansTelephone.match(INE)?.[1]?.toUpperCase() ?? "",
+  };
 }
 
 /**

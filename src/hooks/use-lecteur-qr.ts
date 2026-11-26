@@ -20,8 +20,8 @@ function estChampTexte(cible: EventTarget | null): boolean {
 /**
  * Écoute un lecteur QR externe (USB ou Bluetooth) : ces lecteurs tapent le
  * contenu du code comme un clavier, très vite, puis envoient Entrée ou Tab.
- * Une frappe aussi rapide est interceptée et transmise à `onScan`, sauf si
- * l'utilisateur est en train d'écrire dans un champ de texte.
+ * Une frappe aussi rapide est interceptée et transmise à `onScan`, y compris
+ * quand le curseur est dans un champ (l'Entrée finale n'envoie pas le formulaire).
  */
 export function useLecteurQr(onScan: (contenu: string) => void, actif = true) {
   const onScanRef = useRef(onScan);
@@ -55,10 +55,11 @@ export function useLecteurQr(onScan: (contenu: string) => void, actif = true) {
     }
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.ctrlKey || e.metaKey || e.altKey || estChampTexte(e.target)) {
+      if (e.ctrlKey || e.metaKey || e.altKey) {
         reinitialiser();
         return;
       }
+      const dansChamp = estChampTexte(e.target);
 
       const maintenant = performance.now();
       const enCours = selonCle.length > 0 && maintenant - dernier <= ECART_MAX_MS;
@@ -78,7 +79,7 @@ export function useLecteurQr(onScan: (contenu: string) => void, actif = true) {
       if (!enCours) {
         reinitialiser();
         debut = maintenant;
-      } else {
+      } else if (!dansChamp) {
         // Empêche les caractères suivants d'activer un bouton ou une liste.
         e.preventDefault();
       }
